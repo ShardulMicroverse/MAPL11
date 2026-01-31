@@ -4,26 +4,29 @@ const connectDB = require('./config/database');
 const config = require('./config/environment');
 const { initializeSocket } = require('./sockets/socketServer');
 
+// Global error handlers
+process.on('unhandledRejection', (err) => {
+  console.error('Unhandled Rejection:', err);
+  process.exit(1);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  process.exit(1);
+});
+
 const startServer = async () => {
   try {
-    // Connect to MongoDB
     await connectDB();
 
-    // Create HTTP server
     const server = http.createServer(app);
 
-    // Initialize Socket.io
     initializeSocket(server);
 
-    // Start server
     server.listen(config.port, () => {
-      console.log(`Server running in ${config.nodeEnv} mode on port ${config.port}`);
-    });
-
-    // Handle unhandled promise rejections
-    process.on('unhandledRejection', (err) => {
-      console.error('Unhandled Rejection:', err);
-      server.close(() => process.exit(1));
+      console.log(
+        `Server running in ${config.nodeEnv} mode on port ${config.port}`
+      );
     });
 
   } catch (error) {
